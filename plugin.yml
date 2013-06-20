@@ -1,0 +1,7 @@
+name: ServerMessengerPlugin
+main: ws.slide.minecraft.bukkit.servermessenger.ServerMessengerPlugin
+version: 0.1
+
+permissions:
+
+commands:
