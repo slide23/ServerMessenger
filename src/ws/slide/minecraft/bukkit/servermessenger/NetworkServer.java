@@ -59,6 +59,14 @@ public class NetworkServer implements PluginMessageRecipient {
 		this.socket = socket;
 	}
 
+	public void setConnection(NetworkServerConnection connection) {
+		this.connection = connection;
+	}
+
+	public NetworkServerConnection getConnection() {
+		return this.connection;
+	}
+
 	public void addChannel(String channel) {
 		if (channels.add(channel)) {
 		}

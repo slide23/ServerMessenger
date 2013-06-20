@@ -18,6 +18,7 @@ public class NetworkServerConnector extends Thread {
     	try {
 			this.socket = new Socket(server.getHost(), server.getPort());
 			this.network_server_connection = new NetworkServerConnection(this.socket, server.getName());
+			this.server.setConnection(this.network_server_connection);
 
 			Packet2Handshake packet2handshake = new Packet2Handshake();
 
@@ -27,18 +28,22 @@ public class NetworkServerConnector extends Thread {
 
 			Field bfield = Packet2Handshake.class.getDeclaredField("b");
 			bfield.setAccessible(true);
-			bfield.set(packet2handshake, server.getName());
+			bfield.set(packet2handshake, ServerMessengerPlugin.getInstance().getServerName());
 
-			packet2handshake.c = server.getHost();
-			packet2handshake.d = server.getPort();
+			packet2handshake.c = ServerMessengerPlugin.getInstance().getHost();
+			packet2handshake.d = ServerMessengerPlugin.getInstance().getPort();
+
+			ServerMessengerPlugin.getInstance().getLogger().info(ServerMessengerPlugin.getInstance().getServerName() + " " + ServerMessengerPlugin.getInstance().getHost() + ":" + ServerMessengerPlugin.getInstance().getPort());
 
 			this.network_server_connection.sendPacket(packet2handshake);
 		} catch (Exception e) {
 			server.incrementFailedConnectionAttemptCount();
+			server.setConnection(null);
 
 			e.printStackTrace();
 		} catch (Throwable e) {
 			server.incrementFailedConnectionAttemptCount();
+			server.setConnection(null);
 
 			e.printStackTrace();
 		}

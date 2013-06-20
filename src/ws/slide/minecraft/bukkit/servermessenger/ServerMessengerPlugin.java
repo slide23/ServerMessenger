@@ -6,13 +6,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.minecraft.server.v1_5_R3.MinecraftServer;
+
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Minecart;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class ServerMessengerPlugin extends JavaPlugin {
 	private static ServerMessengerPlugin instance;
-	private String host = "127.0.0.1";
-	private int port = 62323;
-	private boolean allow_incoming = true;
 
 	public static ServerMessengerPlugin getInstance() {
 		if (instance == null)
@@ -28,6 +29,9 @@ public class ServerMessengerPlugin extends JavaPlugin {
 	private Set<NetworkServer> servers;
 	private NetworkServerListenerThread network_server_listener_thread;
 	private ServerMessenger messenger;
+	private String host = "127.0.0.1";
+	private int port = 62323;
+	private boolean allow_incoming = true;
 
 	public ServerMessengerPlugin() {
 		ServerMessengerPlugin.instance = this;
@@ -59,8 +63,21 @@ public class ServerMessengerPlugin extends JavaPlugin {
 		return null;
 	}
 
+	public String getServerName() {
+		return Bukkit.getServerName();
+	}
+
+	public String getHost() {
+		return this.host;
+	}
+
+	public int getPort() {
+		return this.port;
+	}
+
 	@Override
 	public void onEnable() {
+		getLogger().info("Starting up on server " + getServerName());
 		loadServers();
 
 		this.host = getConfig().getString("host", "127.0.0.1");
@@ -79,7 +96,7 @@ public class ServerMessengerPlugin extends JavaPlugin {
 			@Override
 			public void run() {
 				for (NetworkServer server : servers) {
-					if (!server.isConnected() && server.getFailedConnectionAttemptCount() < 5) {
+					if (server.getConnection() == null && server.getFailedConnectionAttemptCount() < 5) {
 						ServerMessengerPlugin.getInstance().getLogger().info("Reconnecting to " + server.getName());
 
 						NetworkServerConnector network_server_connector = new NetworkServerConnector(server);
@@ -88,6 +105,13 @@ public class ServerMessengerPlugin extends JavaPlugin {
 						server.incrementFailedConnectionAttemptCount();
 					}
 				}
+			}
+		}, 20 * 10, 20 * 10);
+
+		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+			@Override
+			public void run() {
+				network_server_listener_thread.a();
 			}
 		}, 20 * 10, 20 * 10);
 	}
@@ -112,22 +136,5 @@ public class ServerMessengerPlugin extends JavaPlugin {
 		}
 		else
 			getLogger().severe("No servers configured!");
-/*
-	public void loadTeams() {
-		if (getConfig().contains("teams")) {
-			getLogger().info("Loading teams");
-			Map<String, Object> team_names = getConfig().getConfigurationSection("teams").getValues(false);
-			for (String team_name : team_names.keySet()) {
-				String block_info = getConfig().getString("teams." + team_name + ".block");
-				ChatColor color = ChatColor.valueOf(getConfig().getString("teams." + team_name + ".color").toUpperCase());
-
-				Team team = new Team(team_name, block_info, color);
-				team_manager.addTeam(team_name, team);
-			}
-		}
-		else
-			getLogger().severe("No teams configured!");
-	}
- */
 	}
 }

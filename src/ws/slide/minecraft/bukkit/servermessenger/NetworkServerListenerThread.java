@@ -22,6 +22,22 @@ public class NetworkServerListenerThread extends Thread {
 		this.inet_address = (inet_address == null) ? (server_socket.getInetAddress()) : (inet_address);
 	}
 
+	public void a() {
+		synchronized (this.connections) {
+			for (int i = 0; i < this.connections.size(); i++) {
+				NetworkServerConnection connection = this.connections.get(i);
+
+				try {
+					connection.c();
+				}  catch (Exception exception) {
+					connection.disconnect("Error");
+				}
+
+				connection.getNetworkManager().a();
+			}
+		}
+	}
+
     public void run() {
         while (this.accepting) {
             try {
