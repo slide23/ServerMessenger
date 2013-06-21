@@ -15,8 +15,9 @@ import net.minecraft.server.v1_5_R3.Packet2Handshake;
 public class NetworkServerConnection extends Connection {
 	private final Socket socket;
 	private final String name;
-	private final NetworkServer server;
+	private NetworkServer server;
 	private final NetworkManager network_manager;
+	private int keepalive = 20;
 	public boolean disconnected = false;
 
 	public NetworkServerConnection(Socket socket, String name, NetworkServer server) throws IOException {
@@ -43,10 +44,14 @@ public class NetworkServerConnection extends Connection {
 	public void c() {
 //		Bukkit.getLogger().info("Called c which is calling b");
 		try {
-//			this.sendPacket(new Packet0KeepAlive(23));
+			if (this.keepalive >= 20) {
+				this.sendPacket(new Packet0KeepAlive(23));
+				this.keepalive = 0;
+			}
 		} catch (Throwable e) { e.printStackTrace(); }
 
 		this.network_manager.b();
+		this.keepalive++;
 	}
 
 	public void disconnect(String error) {
@@ -58,7 +63,7 @@ public class NetworkServerConnection extends Connection {
 	}
 
 	public void sendPacket(Packet packet) throws Throwable {
-		ServerMessengerPlugin.getInstance().getLogger().info("Queueing packet!");
+//		ServerMessengerPlugin.getInstance().getLogger().info("Queueing packet!");
 		this.network_manager.queue(packet);
 	}
 
@@ -71,20 +76,20 @@ public class NetworkServerConnection extends Connection {
 			return;
 		}
 
-		ServerMessengerPlugin.getInstance().getLogger().info("Server Connected: " + packet2handshake.f());
+		this.server = ServerMessengerPlugin.getInstance().getServer(packet2handshake.f());
 		server.setConnection(this);
+
+		ServerMessengerPlugin.getInstance().getLogger().info("Server Connected: " + packet2handshake.f());
 	}
 
 	public void a(Packet0KeepAlive packet0keepalive) {
-		ServerMessengerPlugin.getInstance().getLogger().info("Keep Alive");
+//		ServerMessengerPlugin.getInstance().getLogger().info("Keep Alive");
 	}
 
 	public void a(Packet250CustomPayload packet250custompayload) {
-		ServerMessengerPlugin.getInstance().getLogger().info("Custom Payload in channel " + packet250custompayload.tag + "");
-		ServerMessengerPlugin.getInstance().getLogger().info("Server " + this.server.getName() + " send data in channel " + packet250custompayload.tag);
-		ServerMessengerPlugin.getMessenger().dispatchIncomingMessage(this.server, packet250custompayload.tag, packet250custompayload.data);
+//		ServerMessengerPlugin.getInstance().getLogger().info("Custom Payload in channel " + packet250custompayload.tag + "");
 		if (packet250custompayload.tag.equals("REGISTER")) {
-			ServerMessengerPlugin.getInstance().getLogger().info("Server " + this.server.getName() + " registering for channel " + packet250custompayload.tag);
+//			ServerMessengerPlugin.getInstance().getLogger().info("Server " + this.server.getName() + " registering for channel " + packet250custompayload.tag);
 			try {
 				String channels = new String(packet250custompayload.data, "UTF8");
 				for (String channel : channels.split("\0")) {
@@ -94,7 +99,7 @@ public class NetworkServerConnection extends Connection {
 				throw new AssertionError(ex);
 			}
 		} else if (packet250custompayload.tag.equals("UNREGISTER")) {
-			ServerMessengerPlugin.getInstance().getLogger().info("Server " + this.server.getName() + " unregistering for channel " + packet250custompayload.tag);
+//			ServerMessengerPlugin.getInstance().getLogger().info("Server " + this.server.getName() + " unregistering for channel " + packet250custompayload.tag);
 			try {
 				String channels = new String(packet250custompayload.data, "UTF8");
 				for (String channel : channels.split("\0")) {
@@ -104,6 +109,8 @@ public class NetworkServerConnection extends Connection {
 				throw new AssertionError(ex);
 			}
 		} else {
+//			ServerMessengerPlugin.getInstance().getLogger().info("Server " + this.server.getName() + " send data in channel " + packet250custompayload.tag);
+			ServerMessengerPlugin.getMessenger().dispatchIncomingMessage(this.server, packet250custompayload.tag, packet250custompayload.data);
 		}
 	}
 }

@@ -39,11 +39,13 @@ public class NetworkServerConnector extends Thread {
 			ServerMessengerPlugin.getInstance().getLogger().info(ServerMessengerPlugin.getInstance().getServerName() + " " + ServerMessengerPlugin.getInstance().getHost() + ":" + ServerMessengerPlugin.getInstance().getPort());
 
 			this.network_server_connection.sendPacket(packet2handshake);
-
+/*
 			ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();
 			DataOutputStream dataoutputstream = new DataOutputStream(bytearrayoutputstream);
-			dataoutputstream.writeUTF("CutePVP-Chat");
+			dataoutputstream.writeUTF("CHAT");
 			this.network_server_connection.sendPacket(new Packet250CustomPayload("REGISTER", bytearrayoutputstream.toByteArray()));
+*/
+			ServerMessengerPlugin.getInstance().getNetworkServerListenerThread().addConnection(network_server_connection);
 		} catch (Exception e) {
 			server.incrementFailedConnectionAttemptCount();
 			server.setConnection(null);

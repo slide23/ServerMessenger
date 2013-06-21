@@ -60,6 +60,10 @@ public class ServerMessengerPlugin extends JavaPlugin {
 		return null;
 	}
 
+	public NetworkServerListenerThread getNetworkServerListenerThread() {
+		return this.network_server_listener_thread;
+	}
+
 	public String getServerName() {
 		return Bukkit.getServerName();
 	}

@@ -433,27 +433,19 @@ public class ServerMessenger implements Messenger {
 	}
 
 	public void dispatchIncomingMessage(NetworkServer source, String channel, byte[] message) {
-		ServerMessengerPlugin.getInstance().getLogger().info("a");
-
 		if (source == null) {
 			throw new IllegalArgumentException("Server source cannot be null");
 		}
-
-		ServerMessengerPlugin.getInstance().getLogger().info("b");
 
 		if (message == null) {
 			throw new IllegalArgumentException("Message cannot be null");
 		}
 
-		ServerMessengerPlugin.getInstance().getLogger().info("c");
-
 		validateChannel(channel);
-
-		ServerMessengerPlugin.getInstance().getLogger().info("d");
 
 		Set<PluginMessageListenerRegistration> registrations = getIncomingChannelRegistrations(channel);
 
-		ServerMessengerPlugin.getInstance().getLogger().info(registrations.size() + " registered to " + channel);
+//		ServerMessengerPlugin.getInstance().getLogger().info(registrations.size() + " registered to " + channel);
 		
 		for (PluginMessageListenerRegistration registration : registrations) {
 			((ws.slide.minecraft.bukkit.servermessenger.PluginMessageListener)registration.getListener()).onPluginMessageReceived(channel, source, message);
