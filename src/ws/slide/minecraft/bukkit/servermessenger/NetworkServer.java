@@ -8,7 +8,6 @@ import net.minecraft.server.v1_5_R3.*;
 
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.messaging.PluginMessageRecipient;
-import org.bukkit.plugin.messaging.StandardMessenger;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -16,6 +15,7 @@ public class NetworkServer implements PluginMessageRecipient {
 	private String name;
 	private String host = "127.0.0.1";
 	private int port = 62323;
+	private boolean connect = true;
 	private Socket socket = null;
 	private NetworkServerConnection connection;
     private final Set<String> channels = new HashSet<String>();
@@ -50,7 +50,15 @@ public class NetworkServer implements PluginMessageRecipient {
 	public void setPort(int port) {
 		this.port = port;
 	}
-	
+
+	public boolean getConnect() {
+		return this.connect;
+	}
+
+	public void setConnect(boolean connect) {
+		this.connect = connect;
+	}
+
 	public Socket getSocket() {
 		return socket;
 	}
@@ -82,9 +90,14 @@ public class NetworkServer implements PluginMessageRecipient {
 	}
 
 	public void sendPluginMessage(Plugin source, String channel, byte[] message) {
-        StandardMessenger.validatePluginMessage(ServerMessengerPlugin.getMessenger(), source, channel, message);
+        ServerMessenger.validatePluginMessage(ServerMessengerPlugin.getMessenger(), source, channel, message);
 
-        if (channels.contains(channel)) {
+//        for (String achannel : channels)
+//        	ServerMessengerPlugin.getInstance().getLogger().info("Channel:" + achannel);
+
+//        if (channels.contains(channel)) {
+//        	ServerMessengerPlugin.getInstance().getLogger().info("Constructing packet for plugin message");
+
 			Packet250CustomPayload packet = new Packet250CustomPayload();
 			packet.tag = channel;
 			packet.length = message.length;
@@ -94,7 +107,7 @@ public class NetworkServer implements PluginMessageRecipient {
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}
-        }
+//        }
 	}
 
 	public boolean isConnected() {

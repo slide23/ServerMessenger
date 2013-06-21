@@ -1,8 +1,11 @@
 package ws.slide.minecraft.bukkit.servermessenger;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.lang.reflect.*;
 import java.net.Socket;
 
+import net.minecraft.server.v1_5_R3.Packet250CustomPayload;
 import net.minecraft.server.v1_5_R3.Packet2Handshake;
 
 public class NetworkServerConnector extends Thread {
@@ -17,7 +20,7 @@ public class NetworkServerConnector extends Thread {
     public void run() {
     	try {
 			this.socket = new Socket(server.getHost(), server.getPort());
-			this.network_server_connection = new NetworkServerConnection(this.socket, server.getName());
+			this.network_server_connection = new NetworkServerConnection(this.socket, server.getName(), this.server);
 			this.server.setConnection(this.network_server_connection);
 
 			Packet2Handshake packet2handshake = new Packet2Handshake();
@@ -36,6 +39,11 @@ public class NetworkServerConnector extends Thread {
 			ServerMessengerPlugin.getInstance().getLogger().info(ServerMessengerPlugin.getInstance().getServerName() + " " + ServerMessengerPlugin.getInstance().getHost() + ":" + ServerMessengerPlugin.getInstance().getPort());
 
 			this.network_server_connection.sendPacket(packet2handshake);
+
+			ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();
+			DataOutputStream dataoutputstream = new DataOutputStream(bytearrayoutputstream);
+			dataoutputstream.writeUTF("CutePVP-Chat");
+			this.network_server_connection.sendPacket(new Packet250CustomPayload("REGISTER", bytearrayoutputstream.toByteArray()));
 		} catch (Exception e) {
 			server.incrementFailedConnectionAttemptCount();
 			server.setConnection(null);

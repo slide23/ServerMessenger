@@ -6,10 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import net.minecraft.server.v1_5_R3.MinecraftServer;
-
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Minecart;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class ServerMessengerPlugin extends JavaPlugin {
@@ -96,7 +93,7 @@ public class ServerMessengerPlugin extends JavaPlugin {
 			@Override
 			public void run() {
 				for (NetworkServer server : servers) {
-					if (server.getConnection() == null && server.getFailedConnectionAttemptCount() < 5) {
+					if (server.getConnect() && server.getConnection() == null && server.getFailedConnectionAttemptCount() < 5) {
 						ServerMessengerPlugin.getInstance().getLogger().info("Reconnecting to " + server.getName());
 
 						NetworkServerConnector network_server_connector = new NetworkServerConnector(server);
@@ -113,7 +110,7 @@ public class ServerMessengerPlugin extends JavaPlugin {
 			public void run() {
 				network_server_listener_thread.a();
 			}
-		}, 20 * 10, 20 * 10);
+		}, 1, 1);
 	}
 
 	@Override
@@ -127,10 +124,12 @@ public class ServerMessengerPlugin extends JavaPlugin {
 			getLogger().info("Loading servers");
 			Map<String, Object> server_names = getConfig().getConfigurationSection("servers").getValues(false);
 			for (String server_name : server_names.keySet()) {
-				String host = getConfig().getString("servers." + server_name + ".host");
-				int port = getConfig().getInt("servers." + server_name + ".port");
+				String host = getConfig().getString("servers." + server_name + ".host", "127.0.0.1");
+				int port = getConfig().getInt("servers." + server_name + ".port", 62323);
+				boolean connect = getConfig().getBoolean("servers." + server_name + ".connect", true);
 
 				NetworkServer network_server = new NetworkServer(server_name, host, port);
+				network_server.setConnect(connect);
 				this.servers.add(network_server);
 			}
 		}

@@ -43,7 +43,7 @@ public class NetworkServerListenerThread extends Thread {
             try {
                 Socket socket = this.server_socket.accept();
                 ServerMessengerPlugin.getInstance().getLogger().info("Incoming connection!");
-                NetworkServerConnection network_server_connection = new NetworkServerConnection(socket, "Connection #S");
+                NetworkServerConnection network_server_connection = new NetworkServerConnection(socket, "Connection #S", null);
 
                 this.addConnection(network_server_connection);
             } catch (IOException ioexception) {
